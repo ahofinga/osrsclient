@@ -8,10 +8,13 @@ package rsclient.coregui;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -58,13 +61,13 @@ public class RSClient {
     
 		mainwnd.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		JPanel mainpanel = new JPanel(new MigLayout("fill, insets 5"));
+		final JPanel mainpanel = new JPanel(new MigLayout("fill, insets 5"));
 		mainpanel.setBackground(Color.black);
 		mainpanel.add(toolbar, "dock north, growx, gap 0");
 		toolbar.setVisible(true);
-
-		mainwnd.getContentPane().add(mainpanel);
-		JPanel gamepanel = new JPanel(new MigLayout(" gap 0, ins 0 "));
+                                
+      		mainwnd.getContentPane().add(mainpanel);
+		final JPanel gamepanel = new JPanel(new MigLayout(" gap 0, ins 0 "));
 		gamepanel.setBackground(Color.gray);
 
 		boolean debug = false;
@@ -73,8 +76,8 @@ public class RSClient {
 		mainpanel.add(gamepanel, "height 503:503,width 765:765, cell 0 0, growx, growy"); //height 503:503:503,width 765:765:765,
 		gamepanel.setVisible(true);
 
-		JPanel sidepanel = new JPanel(new MigLayout("ins 0"));
-		JPanel bottompanel = new JPanel(new MigLayout("ins 0"));
+		final JPanel sidepanel = new JPanel(new MigLayout("ins 0"));
+		final JPanel bottompanel = new JPanel(new MigLayout("ins 0"));
 		sidepanel.setBackground(Color.black);
 		bottompanel.setBackground(Color.black);
 
@@ -83,7 +86,17 @@ public class RSClient {
 		mainpanel.add(sidepanel, "width 250, height 503, cell 1 0,growy, spany, dock east ");
 		mainpanel.add(bottompanel, "height 200, width 765,cell 0 1, growx, dock south");
 
-
+                final JButton fullScreen = new JButton("Fullscreen");
+                fullScreen.addActionListener(new ActionListener(){
+                    boolean full = false;
+                    @Override
+                    public void actionPerformed(ActionEvent e){
+                        fullscreen(full, mainpanel, sidepanel, bottompanel, gamepanel);
+                        full = !full;
+                    }
+                });
+                toolbar.add(fullScreen);
+                
 		mainwnd.setVisible(true);
 
 		mainwnd.pack();
@@ -116,4 +129,17 @@ public class RSClient {
 		}
 
 	}
+        
+        
+        private static void fullscreen(boolean full, JPanel mainpanel, JPanel sidepanel, JPanel bottompanel, JPanel gamepanel){
+            if(!full){
+                        mainpanel.remove(sidepanel);
+                        mainpanel.remove(bottompanel);
+                    } else {
+                        mainpanel.add(sidepanel, "width 250, height 503, cell 1 0,growy, spany, dock east ");
+                        mainpanel.add(bottompanel, "height 200, width 765,cell 0 1, growx, dock south"); 
+                    }
+                        gamepanel.revalidate();
+                        gamepanel.repaint();
+        }
 }
