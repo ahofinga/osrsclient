@@ -12,16 +12,20 @@ package rsclient.geguide;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.NumberFormat;
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -42,14 +46,20 @@ public class geGuidePanel extends JPanel {
     JLabel lowAlchLabel;
     JLabel highAlchLabel;
     JLabel updateLabel;
+    JLabel imageLabel;
+    BufferedImage image;
+    ImageIcon imageIcon;
     
     JButton searchButton;
     Timeline rolloverTimeline;
     boolean isValidItem;
-    static String baseURL = "http://oldschoolrunescape.wikia.com/wiki/Exchange:" ;
+    static String baseURL = "http://oldschoolrunescape.wikia.com/wiki/" ;
     URL itemURL;
     
     public geGuidePanel()  {
+        image = null;
+        imageIcon = null;
+        imageLabel = new JLabel();
         setLayout(new MigLayout("ins 5, center"));
         setBackground(Color.black);
         Border loweredbevel = BorderFactory.createEtchedBorder(EtchedBorder.RAISED);
@@ -90,8 +100,9 @@ public class geGuidePanel extends JPanel {
         add(itemLabel, "cell 0 0, gap 0, align left");
         add(searchButton, "cell 2 0,align right ");
         add(itemInputField, "width 60%, cell 1 0,align left,");
-        
+      
         add(priceLabel, "newline, spanx");
+        add(imageLabel, "cell 2 1, height :50, align right, spany 3");
         add(lowAlchLabel, "newline, spanx");
         add(highAlchLabel, "newline, spanx");
         add(updateLabel, "newline, spanx");
@@ -126,7 +137,7 @@ public class geGuidePanel extends JPanel {
     private void loadInfo(String item) throws IOException {
         BufferedReader in = null;
         try{
-        itemURL = new URL(baseURL + item);
+        itemURL = new URL(baseURL + "Exchange:" + item);
         URLConnection yc = itemURL.openConnection();
         in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
         String inputLine;
@@ -166,12 +177,54 @@ public class geGuidePanel extends JPanel {
                 in.close();
             }
         }
+        if(isValidItem) {
+            loadimage(item);
+        }
+    }
+    
+    private void loadimage(String item) throws IOException{
+        BufferedReader in = null;
+        String urlText = "https://ewebdesign.com/wp-content/uploads/2015/10/7-Flickering-404-Error-Page-by-Spiderone.jpg"; //404 not found image
+   
+        try{
+        itemURL = new URL(baseURL + item);
+        URLConnection yc = itemURL.openConnection();
+        in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
+        String inputLine;
+        while ((inputLine = in.readLine()) != null) {
+            String[] tokens = inputLine.split("\"");
+            for(int i = 0; i < tokens.length; i++) {
+                if(tokens[i].contains("/" + item + ".png")){ 
+                   urlText = tokens[i];
+                   break;
+                }
+            }
+        }        
+        
+        isValidItem = true;
+        }
+        catch(Exception e){}
+        finally {
+            if (in != null) {
+                in.close();
+            }
+        }
+             
+        try{
+        URL imageURL = new URL(urlText); 
+        imageIcon = new ImageIcon(imageURL);
+        Image oldimg = imageIcon.getImage(); 
+        Image newimg = oldimg.getScaledInstance(50, 50,  java.awt.Image.SCALE_FAST);
+        imageIcon = new ImageIcon(newimg);  
+        } catch(Exception e) {e.printStackTrace();}
+        imageLabel.setIcon(imageIcon);
     }
     
     private class ItemSearchListener implements ActionListener {
                 @Override
                 public void actionPerformed(ActionEvent ae) {
-                    final String itemName = itemInputField.getText().replace(" ", "_");
+                    String formatter = itemInputField.getText().replace(" ", "_").toLowerCase(); //format request
+                    final String itemName = formatter.substring(0, 1).toUpperCase() + formatter.substring(1);
                     Runnable r1;
                     r1 = new Runnable() {
                         @Override
