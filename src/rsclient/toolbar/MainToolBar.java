@@ -6,8 +6,13 @@
 package rsclient.toolbar;
 
 import java.awt.Color;
+import java.awt.ComponentOrientation;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.time.Clock;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
 import javax.swing.JToolBar;
 import net.miginfocom.swing.MigLayout;
 
@@ -17,8 +22,10 @@ import net.miginfocom.swing.MigLayout;
  */
 public class MainToolBar extends JToolBar {
 
+    UTCClock clock;
+    
     public MainToolBar() {
-        setLayout(new MigLayout());
+        setLayout(new MigLayout("fillx", "[shrink 10]"));
         setFloatable(false);
         setBackground(new Color(24, 24, 24));
         setRollover(true);
@@ -32,21 +39,32 @@ public class MainToolBar extends JToolBar {
         final HelpMenu helpmenu = new HelpMenu();
 
         linksButton.addMouseListener(new MouseAdapter() {
+            @Override
             public void mousePressed(MouseEvent e) {
                 linksmenu.show(e.getComponent(), e.getX(), e.getY());
             }
         });
 
         helpButton.addMouseListener(new MouseAdapter() {
+            @Override
             public void mousePressed(MouseEvent e) {
                 helpmenu.show(e.getComponent(), e.getX(), e.getY());
             }
         });
-
+        
+        JPanel clockPanel = new JPanel();
+        clockPanel.setBackground(Color.BLACK);
+        JLabel clockLabel = new JLabel();
+        clock = new UTCClock(clockLabel);
+        clockLabel.setForeground(Color.white);
+        clockPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        clockPanel.setLayout(new MigLayout());
+        clockPanel.add(clockLabel);
+        
         add(optionsButton);
         add(linksButton);
         add(screenshotButton);
         add(helpButton);
-
+        add(clockPanel, "pushx 10, growx, dock east");
     }
 }
